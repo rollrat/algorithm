@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <ostream>
+
 template <typename T> struct linked_binary_tree_node {
   typedef class linked_binary_tree_node<T> this_type;
   this_type *left;
@@ -32,6 +34,30 @@ public:
   void remove_node(node_type *node) {
     if (node == nullptr)
       return;
+  }
+
+  void print(std::ostream &out) const {
+    if (root_node == nullptr)
+      return;
+
+    print_internal(out, root_node, 0, true);
+  }
+
+private:
+  void print_internal(std::ostream &out, node_type *node, int indent_depth,
+                      bool is_left) const {
+    auto indent = std::string(indent_depth, ' ');
+
+    if (is_left) {
+      out << indent << " - L: " << node->value << std::endl;
+    } else {
+      out << indent << " - R: " << node->value << std::endl;
+    }
+
+    if (node->left != nullptr)
+      print_internal(out, node->left, indent_depth + 2, true);
+    if (node->right != nullptr)
+      print_internal(out, node->right, indent_depth + 2, false);
   }
 };
 
