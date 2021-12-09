@@ -47,6 +47,22 @@ public:
     }
   }
 
+  node_type *find(const T &value) {
+    node_type *iter = tree.root()->right;
+
+    while (iter != nullptr) {
+      if (iter->value == value)
+        return iter;
+      if (iter->value < value) {
+        iter = iter->right;
+      } else {
+        iter = iter->left;
+      }
+    }
+
+    return nullptr;
+  }
+
   void remove(const T &value) {
     node_type *iter = tree.root()->right;
     node_type *iter_p = tree.root();
