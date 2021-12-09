@@ -1,2 +1,2 @@
 
-add_executable( tree tree_test.cpp )
+add_executable( tree bst_test.cpp )

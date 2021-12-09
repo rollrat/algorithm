@@ -6,17 +6,18 @@
 
 template <typename T> struct linked_binary_tree_node {
   typedef class linked_binary_tree_node<T> this_type;
-  this_type *left;
-  this_type *right;
-  this_type *parent;
+  this_type *left = nullptr;
+  this_type *right = nullptr;
   T value;
 
   linked_binary_tree_node(T value) : value(value) {}
+
+  void swap_value(this_type *node) { std::swap(this->value, node->value); }
 };
 
 template <typename T> class linked_binary_tree {
   typedef class linked_binary_tree_node<T> node_type;
-  node_type *root_node;
+  node_type *root_node = nullptr;
 
 public:
   node_type *root() const { return root_node; }
@@ -34,6 +35,9 @@ public:
   void remove_node(node_type *node) {
     if (node == nullptr)
       return;
+    remove_node(node->left);
+    remove_node(node->right);
+    delete node;
   }
 
   void print(std::ostream &out) const {
@@ -43,9 +47,16 @@ public:
     print_internal(out, root_node, 0, true);
   }
 
+  static void print(std::ostream &out, node_type *node) {
+    if (node == nullptr)
+      return;
+
+    print_internal(out, node, 0, true);
+  }
+
 private:
-  void print_internal(std::ostream &out, node_type *node, int indent_depth,
-                      bool is_left) const {
+  static void print_internal(std::ostream &out, node_type *node,
+                             int indent_depth, bool is_left) {
     auto indent = std::string(indent_depth, ' ');
 
     if (is_left) {
