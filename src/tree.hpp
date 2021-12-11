@@ -13,14 +13,38 @@ template <typename T> struct linked_binary_tree_node {
   linked_binary_tree_node(T value) : value(value) {}
 
   void swap_value(this_type *node) { std::swap(this->value, node->value); }
+
+  void swap_node(this_type *node) {
+    std::swap(left, node->left);
+    std::swap(right, node->right);
+  }
 };
 
-template <typename T> class linked_binary_tree {
-  typedef class linked_binary_tree_node<T> node_type;
+template <typename T> struct linked_binary_tree_node_allow_parent {
+  typedef class linked_binary_tree_node_allow_parent<T> this_type;
+  this_type *left = nullptr;
+  this_type *right = nullptr;
+  this_type *parent = nullptr;
+  T value;
+
+  linked_binary_tree_node_allow_parent(T value) : value(value) {}
+
+  void swap_value(this_type *node) { std::swap(this->value, node->value); }
+
+  void swap_node(this_type *node) {
+    std::swap(left, node->left);
+    std::swap(right, node->right);
+    std::swap(parent, node->parent);
+  }
+};
+
+template <typename T, class N = linked_binary_tree_node<T>>
+class linked_binary_tree {
+  typedef N node_type;
   node_type *root_node = nullptr;
 
 public:
-  node_type *root() const { return root_node; }
+  inline node_type *root() const { return root_node; }
 
   void refresh(const T &value) {
     remove_node(this->root_node);
