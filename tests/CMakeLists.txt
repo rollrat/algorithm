@@ -1,2 +1,2 @@
 
-add_executable( tree heap_test.cpp )
+add_executable( tree balanced_tree.cpp )

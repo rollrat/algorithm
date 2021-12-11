@@ -6,21 +6,20 @@
 #include "tree.hpp"
 
 // T must be comparable, printable type
-template <typename T> class linked_binary_serach_tree {
-  typedef class linked_binary_tree_node<T> node_type;
-  typedef class linked_binary_tree<T> tree_type;
-
-  tree_type tree;
-
+template <typename T, class N = linked_binary_tree_node<T>>
+class linked_binary_serach_tree {
 public:
+  typedef N node_type;
+  typedef class linked_binary_tree<T, node_type> tree_type;
+
   linked_binary_serach_tree() { tree.refresh(-1); }
 
   node_type *root() const { return tree.root()->right; }
 
   void print(std::ostream &out) const { tree.print(out); }
 
-  void insert(const T &value) {
-    node_type *new_node = tree.make_node(value);
+  virtual void insert(const T &value) {
+    node_type *new_node = tree_type::make_node(value);
 
     // if root node not exists
     if (tree.root()->right == nullptr) {
@@ -47,7 +46,7 @@ public:
     }
   }
 
-  node_type *find(const T &value) {
+  virtual node_type *find(const T &value) {
     node_type *iter = tree.root()->right;
 
     while (iter != nullptr) {
@@ -63,7 +62,7 @@ public:
     return nullptr;
   }
 
-  void remove(const T &value) {
+  virtual void remove(const T &value) {
     node_type *iter = tree.root()->right;
     node_type *iter_p = tree.root();
 
@@ -107,7 +106,9 @@ public:
     tree.remove_node(iter);
   }
 
-private:
+protected:
+  tree_type tree;
+
   /*
              B
            /  \
@@ -123,29 +124,46 @@ private:
            /  \
           A    C
   */
-  node_type *rotate_left(node_type *node) {
-    node_type *B = node;
-    node_type *D = node->right;
-    node_type *C = D->left;
+  node_type *rotate_left(node_type *node, node_type *node_p) {
+    node_type *B = nullptr;
+    node_type *C = nullptr;
+    node_type *D = nullptr;
 
-    D->parent = B->parent;
-    B->parent = D;
-    if (C != nullptr)
-      C->parent = B;
-    B->right = C;
+    B = node;
+    D = node->right;
+
+    if (D != nullptr)
+      C = D->left;
+
+    if (node_p != nullptr)
+      if (node_p->left == node)
+        node_p->left = D;
+      else
+        node_p->right = D;
+
     D->left = B;
+    B->right = C;
 
     return D;
   }
-  node_type *rotate_right(node_type *node) {
-    node_type *B = node->right;
-    node_type *D = node;
-    node_type *C = B->right;
 
-    B->parent = D->parent;
-    D->parent = B;
-    if (C != nullptr)
-      C->parent = D;
+  node_type *rotate_right(node_type *node, node_type *node_p) {
+    node_type *B = nullptr;
+    node_type *C = nullptr;
+    node_type *D = nullptr;
+
+    D = node;
+    B = D->left;
+
+    if (B->right != nullptr)
+      C = B->right;
+
+    if (node_p != nullptr)
+      if (node_p->left == node)
+        node_p->left = B;
+      else
+        node_p->right = B;
+
     B->right = D;
     D->left = C;
 

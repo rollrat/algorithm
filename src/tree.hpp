@@ -51,7 +51,7 @@ public:
     root_node = make_node(value);
   }
 
-  node_type *make_node(const T &type) {
+  static node_type *make_node(const T &type) {
     node_type *node = new node_type(type);
     return node;
   }
