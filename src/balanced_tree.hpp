@@ -21,24 +21,95 @@ public:
     this->tree.root()->right = insert_internal(this->root(), new_node);
   }
 
-  virtual void remove(const T &value) {}
+  virtual void remove(const T &value) {
+    if (this->root() == nullptr)
+      return;
+
+    this->tree.root()->right =
+        remove_internal(this->tree.root()->right, this->tree.root(), value);
+  }
 
 private:
   node_type *insert_internal(node_type *parent, node_type *n_node) {
+    // if key exists, then dot not any behavior
     if (n_node->value < parent->value) {
-      if (parent->left != nullptr)
-        parent->left = insert_internal(parent->left, n_node);
-      else
-        parent->left = n_node;
-
-    } else {
-      if (parent->right != nullptr)
-        parent->right = insert_internal(parent->right, n_node);
-      else
-        parent->right = parent->right = n_node;
+      parent->left = parent->left != nullptr
+                         ? insert_internal(parent->left, n_node)
+                         : n_node;
+    } else if (n_node->value > parent->value) {
+      parent->right = parent->right != nullptr
+                          ? insert_internal(parent->right, n_node)
+                          : n_node;
     }
 
     return balance(parent);
+  }
+
+  node_type *remove_internal(node_type *parent, node_type *parent_parent,
+                             const T &value) {
+    if (value < parent->value) {
+      if (parent->left == nullptr)
+        return parent;
+
+      parent->left = remove_internal(parent->left, parent, value);
+    } else if (value > parent->value) {
+      if (parent->right == nullptr)
+        return parent;
+
+      parent->right = remove_internal(parent->right, parent, value);
+    } else {
+      if (parent->left == nullptr || parent->right == nullptr) {
+        node_type *tmp;
+
+        if (parent_parent->left == parent) {
+          tmp = parent_parent->left =
+              parent->left == nullptr
+                  ? parent->right == nullptr ? nullptr : parent->right
+                  : parent->left;
+        } else {
+          tmp = parent_parent->right =
+              parent->left == nullptr
+                  ? parent->right == nullptr ? nullptr : parent->right
+                  : parent->left;
+        }
+
+        parent->left = nullptr;
+        parent->right = nullptr;
+        this->tree.remove_node(parent);
+
+        parent = tmp;
+
+        if (parent == nullptr)
+          return nullptr;
+      } else {
+        remove_internal_right_most_value(parent->left, parent, parent);
+      }
+    }
+
+    return balance(parent);
+  }
+
+  node_type *remove_internal_right_most_value(node_type *p, node_type *pp,
+                                              node_type *parent) {
+    if (p->right != nullptr) {
+      p->right = remove_internal_right_most_value(p->right, p, parent);
+    } else {
+      if (parent->left == p)
+        parent->left = nullptr;
+
+      if (p->left != nullptr)
+        pp->left = p->left;
+
+      p->swap_value(parent);
+
+      p->left = nullptr;
+      p->right = nullptr;
+      this->tree.remove_node(p);
+
+      return nullptr;
+    }
+
+    return balance(p);
   }
 
   node_type *balance(node_type *target) {
@@ -57,11 +128,11 @@ private:
       }
 
       /*
-                 A                 C
-               /                 /  \
-              B         =>      B    A
-               \
-                C
+               A              A              C
+             /               /             /  \
+            B      =>       C     =>      B    A
+             \            /
+              C          B
       */
       else {
         this->rotate_left(target->left, target);
@@ -81,11 +152,11 @@ private:
       }
 
       /*
-          A                    C
-           \                 /  \
-            B         =>    A    B
-          /
-         C
+          A            A                C
+           \            \             /  \
+            B    =>      C     =>    A    B
+          /               \
+         C                 B
       */
       else {
         this->rotate_right(target->right, target);
